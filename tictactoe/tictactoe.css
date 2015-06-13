@@ -1,0 +1,5 @@
+.board {
+    border: 3px solid #888;
+    border-radius: 15px;
+    background-color: black;
+}
