@@ -3,3 +3,12 @@
     border-radius: 15px;
     background-color: black;
 }
+
+.messages {
+    border: 1px solid #888;
+    border-radius: 15px;
+    background-color: #9cf;
+	padding: 10px;
+	overflow-y: auto;
+	overflow-x: none;
+}

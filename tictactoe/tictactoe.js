@@ -9,7 +9,10 @@ var TicTacToe = {
     boardY: -1,
     player: -1,
     board: [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-    names: ["Xs", "", "Os"]
+    names: ["Xs", "", "Os"],
+	xScore: 0,
+	yScore: 0,
+	drawScore: 0
 };
 
 $(function () {
@@ -36,19 +39,28 @@ $(function () {
                     if (checkForWin(TicTacToe.boardX, TicTacToe.boardY, TicTacToe.player)) {
                         TicTacToe.running = false;
                         drawWinLine(TicTacToe.boardX, TicTacToe.boardY, TicTacToe.player);
-                        alert(TicTacToe.names[TicTacToe.player + 1] + " won the game");
+                        message(TicTacToe.names[TicTacToe.player + 1] + " won the game");
+						if (TicTacToe.player == -1) {
+							TicTacToe.xScore += 1;
+							$("#xscore").html("" + TicTacToe.xScore);
+						} else if (TicTacToe.player == 1) {
+							TicTacToe.yScore += 1;
+							$("#yscore").html("" + TicTacToe.yScore);
+						}
                     }
                     TicTacToe.player = TicTacToe.player * -1;
                     if (TicTacToe.count >= 9 && TicTacToe.running === true) {
                         TicTacToe.running = false;
-                        alert("The game ended in a draw.");
+                        message("The game ended in a draw.");
+						TicTacToe.drawScore += 1;
+						$("#drawscore").html("" + TicTacToe.drawScore);
                     }
                 } else {
-                    alert("Square is taken");
+                    message("Square is taken");
                 }
             }
         } else {
-            alert("The game is over");
+            message("The game is over");
         }
     });
     
@@ -80,6 +92,8 @@ function reset() {
     TicTacToe.context.strokeStyle = "white";
     TicTacToe.context.lineWidth = 3;
     TicTacToe.context.stroke();
+	$("#messages").html("");
+	$("#messages").css("height", $("#board").height() - $("#resetBoard").height());
 }
 function calculateBox(x, y) {
     "strict mode";
@@ -193,4 +207,9 @@ function checkDiagonalLeft(player) {
     return TicTacToe.board[2][0] === player && 
             TicTacToe.board[1][1] === player && 
             TicTacToe.board[0][2] === player;
+}
+
+function message(msg) {
+   "strict mode";
+ 	$("#messages").html("<p>" + msg + "</p>\n" + $("#messages").html());
 }

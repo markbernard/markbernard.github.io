@@ -14,10 +14,20 @@
     <div class="row">
         <div class="col-md-4 text-right">
             <input type="button" id="resetBoard" class="btn btn-primary" value="Reset Game" />
+			<div id="messages" class="messages text-left">This is a test</div>
         </div>
         <div class="col-md-4">
             <canvas id="board" class="board" width="400" height="400" />
         </div>
+        <div class="col-md-1"></div>
+        <div class="col-md-3">
+			<table class="table table-striped">
+				<tr><th>Player</th><th>Score</th></tr>
+				<tr><td>Xs</td><td id="xscore">0</td></tr>
+				<tr><td>Os</td><td id="yscore">0</td></tr>
+				<tr><td>draws</td><td id="drawscore">0</td></tr>
+			</table>
+		</div>
     </div>
 </div> <!-- container -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
