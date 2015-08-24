@@ -34,6 +34,12 @@ var Invaders = {
     alienShotX: 0,
     alienShotY: 0,
     alienShot: false,
+    alienMotherShipX: 0,
+    alienMotherShipY: 6,
+    alienMotherShipDeltaX: 0,
+    alienMotherShipSpeed: 0,
+    alienMotherShipCounter: 0,
+    alienMotherShipOn: false,
     mouseX: 0,
     mouseY: 0
 };
@@ -48,6 +54,8 @@ $(function () {
 
 function reset() {
     "strict mode";
+    var i;
+    
     Invaders.gameId = guid();
     Invaders.resourceCounter = 0;
     Invaders.canvas = document.getElementById("board");
@@ -79,12 +87,15 @@ function reset() {
     }
     Invaders.playerBase.src = "base.png";
     
-    Invaders.alienShip = new Image;
-    Invaders.resourceCounter += 1;
-    Invaders.alienShip.onload = function () {
-        Invaders.resourceCounter -= 1;
+    Invaders.alienShip = [new Image, new Image, new Image, new Image];
+    Invaders.resourceCounter += 4;
+    
+    for (i=0;i<4;i+=1) {
+        Invaders.alienShip[i].onload = function () {
+            Invaders.resourceCounter -= 1;
+        }
+        Invaders.alienShip[i].src = "invader" + (i + 1) + ".png";
     }
-    Invaders.alienShip.src = "invader1.png";
     createAliens(1.25);
     
     Invaders.alienBullet = new Image;
@@ -144,10 +155,12 @@ function createAliens(speed) {
     Invaders.alienRight = 10;
     Invaders.alienTop = 0;
     Invaders.alienX = 0;
-    Invaders.alienY = 0;
+    Invaders.alienY = 25;
     Invaders.alienDeltaX = speed;
     Invaders.alienDeltaY = 10;
     Invaders.alienCount = 55;
+    Invaders.alienMotherShipSpeed = speed * 2;
+    Invaders.alienMotherShipCounter = 500;
 }
 
 function update() {
@@ -210,6 +223,16 @@ function update() {
                 }
             }
         }
+        
+        if (Invaders.playerBulletX >= Invaders.alienMotherShipX && 
+                Invaders.playerBulletX <= Invaders.alienMotherShipX + 48 &&
+                Invaders.playerBulletY >= Invaders.alienMotherShipY + 20 &&
+                Invaders.playerBulletY <= Invaders.alienMotherShipY + 34) {
+            Invaders.alienMotherShipOn = false;
+            Invaders.playerBulletFired = false;
+            Invaders.score += ((Math.floor(Math.random() * 9) + 2) * 50) + (Invaders.level * 100) + 100;
+        }
+        
         Invaders.playerBulletY -= 10;
         if (Invaders.playerBulletY <= -10) {
             Invaders.playerBulletFired = false;
@@ -253,6 +276,27 @@ function update() {
     if (Invaders.alienShotY > 600) {
         Invaders.alienShot = false;
     }
+    
+    if (Invaders.alienMotherShipCounter <= 0) {
+        Invaders.alienMotherShipCounter = 500;
+        Invaders.alienMotherShipOn = true;
+        if (Math.random() > 0.5) {
+            Invaders.alienMotherShipX = -48;
+            Invaders.alienMotherShipDeltaX = Invaders.alienMotherShipSpeed;
+        } else {
+            Invaders.alienMotherShipX = 800;
+            Invaders.alienMotherShipDeltaX = -Invaders.alienMotherShipSpeed;
+        }
+    } else {
+        Invaders.alienMotherShipCounter -= 1;
+    }
+    
+    if (Invaders.alienMotherShipOn === true) {
+        Invaders.alienMotherShipX += Invaders.alienMotherShipDeltaX;
+        if (Invaders.alienMotherShipX < -48 || Invaders.alienMotherShipX > 800) {
+            Invaders.alienMotherShipOn = false;
+        }
+    }
 }
 
 function render() {
@@ -271,9 +315,12 @@ function render() {
     for (x=0;x<11;x += 1) {
         for (y=0;y<5;y += 1) {
             if (Invaders.alien[x][y]) {
-                Invaders.context.drawImage(Invaders.alienShip, x * 48 + Invaders.alienX, y * 48 + Invaders.alienY);
+                Invaders.context.drawImage(Invaders.alienShip[Math.floor((y + 1) / 2)], x * 48 + Invaders.alienX, y * 48 + Invaders.alienY);
             }
         }
+    }
+    if (Invaders.alienMotherShipOn === true) {
+        Invaders.context.drawImage(Invaders.alienShip[3], Invaders.alienMotherShipX, Invaders.alienMotherShipY);
     }
     
     if (Invaders.alienShot === true) {
