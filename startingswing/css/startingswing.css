@@ -25,3 +25,7 @@ h5 {
 h6 {
     font-size: 0.85em;
 }
+
+.scroll {
+    overflow-y: auto;
+}
