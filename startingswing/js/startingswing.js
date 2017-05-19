@@ -13,6 +13,7 @@ function setSizes() {
     height -= headerHeight;
     height -= footerHeight;
     $(".scroll").css("max-height", height + "px");
+    $(".scroll").css("height", height + "px");
 }
 
 function parseParameters() {
@@ -45,4 +46,10 @@ $(function () {
     parseParameters();
     loadPage();
     setSizes();
+    $(window).resize(function () {
+        setSizes();
+    });
+    $("pre code").each(function(i, block) {
+        hljs.highlightBlock(block);
+    });
 });

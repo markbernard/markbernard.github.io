@@ -26,6 +26,31 @@ h6 {
     font-size: 0.85em;
 }
 
+pre {
+    font-family: "Lucida Console", Monaco, monospace;
+    font-size: 0.85em;
+}
+
+figure {
+    padding: 4px;
+    border: 2px solid #ddd;
+    margin-bottom: 5px;
+}
+
+figcaption {
+    font-size: 0.8em
+}
+
 .scroll {
     overflow-y: auto;
+}
+
+.chapter-heading {
+    font-size: 1.5em;
+}
+
+.inline-code {
+    font-family: "Lucida Console", Monaco, monospace;
+    font-size: 0.85em;
+    background-color: #f5f5f5;
 }
