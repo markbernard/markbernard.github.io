@@ -31,20 +31,8 @@ function parseParameters() {
     }
 }
 
-function loadPage() {
-    $.ajax({
-        url: "/startingswing/" + SwingBook.params["page"] + ".html",
-        async: false,
-        success: function (result) {
-            $('#content').html(result);
-            found = true;
-        }
-    });
-}
-
 $(function () {
     parseParameters();
-    loadPage();
     setSizes();
     $(window).resize(function () {
         setSizes();
