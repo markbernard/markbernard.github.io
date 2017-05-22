@@ -149,7 +149,7 @@ public class JNotepad {
 <div class="panel-footer foot-nav">
     <div class="row">
         <div class="col-md-4 col-sm-1"><a href="/startingswing/page.php?page=intro">Introduction</a></div>
-        <div class="col-md-4 col-sm-1 text-center"><a href="/startingswing/contents.php">Contents</a></div>
+        <div class="col-md-4 col-sm-1 text-center"><a href="/startingswing/page.php?page=contents">Contents</a></div>
         <div class="col-md-4 col-sm-1"><span class="pull-right"><a href="/startingswing/page.php?page=chap2">Editing Area</a></span></div>
     </div>
 </div>

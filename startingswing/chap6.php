@@ -1,0 +1,109 @@
+<div class="panel-heading">
+    <h2 class="panel-title chapter-heading">View & Help Menu</h2>
+</div>
+<div class="panel-body scroll">
+    <div class="row">
+        <div class="col-md-6">
+            <figure>
+                <img class="img-responsive" src="/startingswing/res/figure6-1.png" width="100%" alt="Figure 6-1: " title="Figure 6-1: " />
+                <figcaption><strong>Figure 6-1:</strong> </figcaption>
+            </figure>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <figure>
+                <img class="img-responsive" src="/startingswing/res/figure6-2.png" width="100%" alt="Figure 6-2: " title="Figure 6-2: " />
+                <figcaption><strong>Figure 6-2:</strong> </figcaption>
+            </figure>
+        </div>
+    </div>
+    <p>There are only 3 menu options left and they are pretty short. The first option is the status bar.</p>
+<pre><code class="java">private JPanel statusBarPanel;
+private JLabel positionLabel;
+</code></pre>
+    <p>First we’ll need a panel and a label. We also have to make them fields so we can manipulate them later based on user input.</p>
+<pre><code class="java">public JNotepad(JFrame parentFrame) {
+     .
+     .
+     .
+    createStatusBar();
+}
+</code></pre>
+    <p>Next well call a method, which we will create, from the constructor to create the status bar.</p>
+<pre><code class="java">private void createStatusBar() {
+    statusBarPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    positionLabel = new JLabel();
+    positionLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+    statusBarPanel.add(positionLabel);
+    if (ApplicationPreferences.isStatusBar()) {
+        add(statusBarPanel, BorderLayout.SOUTH);
+    }
+    updateStatusBar(textArea.getCaretPosition());
+}
+</code></pre>
+    <p>Here we’ll create the panel that will become the status bar. We only have one item to make for the status bar and that is an indicator for the line and column that the cursor is at. The positionLabel will take care of that. Once the status bar is ready we’ll check to see if it should be visible. If so we’ll add it to the main application window at the bottom. Lastly we need to call the method updateStatusBar(textArea.getCaretPosition()) with position of the caret. We’ll define that method shortly. The getCaretPosition() method returns a single integer indicating where in the string the next typed character would be inserted.</p>
+<pre><code class="java">private void updateStatusBar(int position) {
+    try {
+        int line = textArea.getLineOfOffset(position);
+        int column = position - textArea.getLineStartOffset(line);
+        positionLabel.setText(String.format("Ln %d, Col %d", (line + 1), (column + 1)));
+    } catch (Exception e) {
+        //not critical if the position in the
+        //status bar does not get updated.
+        e.printStackTrace();
+    }
+}
+</code></pre>
+    <p>The JTextArea class provides methods to figure out where in the visible text area the cursor is, based on the position within the string that it is at. The first method, getLineOfOffset(position) is pretty self-explanatory. It just returns which line it is on. The method getLineStartoffset(line) will give the position within the string that the provided line number starts on. If we take the current position that was passed into this method and subtract the value of the line start offset we will get which column we are on. The last thing we do here is update the label with the information we just calculated. Since the numbers we get are zero based we need to add one to each to give a proper value for the user. The methods that we use her from JTextArea throw a checked exception if the value passed in is out of bounds for the data that it has. Since all these values are calculated and not arbitrary we don’t have to worry about doing anything with the exception.</p>
+<pre><code class="java">public JNotepad(JFrame parentFrame) {
+     .
+     .
+     .
+    textArea.addCaretListener(new CaretListener() {
+        @Override
+        public void caretUpdate(CaretEvent e) {
+            updateStatusBar(e.getDot());
+        }
+    });
+</code></pre>
+    <p>Looking back at the constructor we can now add a listener to the text area that will be called every time the caret moves. Inside that event listener we call the updateStatusBar(e.getDot()) method that we just defined and pass in the position provided by the event. There are a couple more places that need to update the status bar as well.</p>
+<pre><code class="java">public void newDocument() {
+     .
+     .
+     .
+    updateStatusBar(textArea.getCaretPosition());
+</code></pre>
+    <p>After creating a new document you want to reset the position information.</p>
+<pre><code class="java">public void load() {
+     .
+     .
+     .
+    if (saveSuccessful) {
+         .
+         .
+         .
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+             .
+             .
+             .
+            updateStatusBar(textArea.getCaretPosition());
+</code></pre>
+    <p>Also when the user loads a file the caret position will be reset.</p>
+<pre><code class="java">public void help() {
+    try {
+        Desktop.getDesktop().browse(new URI("https://www.google.ca/"));
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+</code></pre>
+    <p>In the days before the Internet most Windows applications would provide a custom help file with their application. Then the help menu would show that file. These days most people provide documentation in HTML form and host it on their website. We can take advantage of this with the java.awt.Desktop class. This class provides operations that are common across desktop platforms. One operation is opening a default editor or viewer for a specific file type. The one we will use here is to open the default browser for the URI that we provide. This will typically point to the root of your help manual on your web site. You can also provide the HTML files for the help documentation when your application is installed and point the browser there instead. The Desktop class is a factory class and will provide the correct instance for the platform your application is running on.</p>
+</div>
+<div class="panel-footer foot-nav">
+    <div class="row">
+        <div class="col-md-4 col-sm-1"><a href="/startingswing/page.php?page=chap5">Format Menu</a></div>
+        <div class="col-md-4 col-sm-1 text-center"><a href="/startingswing/page.php?page=contents">Contents</a></div>
+        <div class="col-md-4 col-sm-1"><span class="pull-right"><a href="/startingswing/page.php?page=chap7">Toolbar</a></span></div>
+    </div>
+</div>

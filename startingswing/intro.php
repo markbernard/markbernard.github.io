@@ -12,7 +12,7 @@
 <div class="panel-footer foot-nav">
     <div class="row">
         <div class="col-md-4 col-sm-1"></div>
-        <div class="col-md-4 col-sm-1 text-center"><a href="/startingswing/contents.php">Contents</a></div>
+        <div class="col-md-4 col-sm-1 text-center"><a href="/startingswing/page.php?page=contents">Contents</a></div>
         <div class="col-md-4 col-sm-1"><span class="pull-right"><a href="/startingswing/page.php?page=chap1">Showing a Window</a></span></div>
     </div>
 </div>
