@@ -3,7 +3,7 @@
 </div>
 <div class="panel-body scroll">
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <figure>
                 <img class="img-responsive" src="/startingswing/res/figure6-1.png" width="100%" alt="Figure 6-1: " title="Figure 6-1: " />
                 <figcaption><strong>Figure 6-1:</strong> </figcaption>
@@ -11,7 +11,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <figure>
                 <img class="img-responsive" src="/startingswing/res/figure6-2.png" width="100%" alt="Figure 6-2: " title="Figure 6-2: " />
                 <figcaption><strong>Figure 6-2:</strong> </figcaption>
