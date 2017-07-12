@@ -14,12 +14,17 @@ public class JNotepad {
         } catch (Exception e) {
             // System look and feel is always present.
         }
-        JFrame frame = new JFrame("JNotepad");
-        frame.setVisible(true);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                JFrame frame = new JFrame("JNotepad");
+                frame.setVisible(true);
+            }
+        });
     }
 }
 </code></pre>
-    <p>The first thing you see here is that we are creating the <span class="inline-code">JFrame</span> in the main method. This is where I will always create it. You will also notice the line <span class="inline-code">UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())</span>. Swing uses a system of drawing called Pluggable Look and Feel (PLAF). PLAF is a very advanced topic so it won't be covered here. If you want more information there is a lot on the Internet. This just tells Swing to use a PLAF that matches the OS you are running on so your application can look like Windows if it is running on Windows or Mac for Mac or Linux for Linux. When using the system look and feel you can effectively ignore the exception that could be thrown, since the system look and feel is always present.</p>
+    <p>The first thing you see here is <span class="inline-code">UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())</span>. Swing uses a system of drawing called Pluggable Look and Feel (PLAF). PLAF is a very advanced topic so it won't be covered here. If you want more information there is a lot on the Internet. This just tells Swing to use a PLAF that matches the OS you are running on so your application can look like Windows if it is running on Windows or Mac for Mac or Linux for Linux. When using the system look and feel you can effectively ignore the exception that could be thrown, since the system look and feel is always present. You will also notice <span class="inline-code">SwingUtilities.invokeLater(Runnable doRun)</span>. Swing GUI elements are not thread safe. There is a special thread, that I’ll discuss later, called the Event Dispatch Thread (EDT). Any manipulations done by the Swing system occur there. Any changes that you are going to make to the GUI should only occur on the EDT to ensure that they do not interfere with regular Swing events/changes. Placing your GUI code inside a <span class="inline-code">java.lang.Runnable</span> object and passing that into <span class="inline-code">SwingUtilities.invokeLater(Runnable doRun)</span> will ensure that the code in the <span class="inline-code">Runnable</span> object will execute on the EDT. This is also where we will create the JFrame. This is where I will always create it.</p>
     <div class="row">
         <div class="col-md-3">
             <figure>
@@ -51,14 +56,21 @@ public class JNotepad {
      .
      .
      .
-    frame.setSize(800, 600);
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    frame.setVisible(true);
+    SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+             .
+             .
+             .
+            frame.setSize(800, 600);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setVisible(true);
+        }
+    });
 }
 </code></pre>
     <p>Here is an immediate fix for the size and closing problem. If you run with those changes you can now see the window clearly and exit the program when you close the window.</p>
     <p>This setup for size and closing is just done to show a simple way of creating a window. Once you get into a full application you will want more control over these things so you can make your application more user friendly. Let’s get started with that right now.</p>
-    <p>Remove those 2 lines for size and closing. Now add an interface to your class for <span class="inline-code">javax.swing.event.WindowListener</span>. Swing uses an event based system to communicate to your application what the user is doing. It uses the Producer/Consumer pattern. A Producer, as the name implies, will produce events that it can share with anyone that is interested. A Consumer is an interested party that will want events that a Producer creates. By implementing the <span class="inline-code">WindowListener</span> interface you are enabling your class to become a consumer of windowing events.</p>
 <pre><code class="java">public class JNotepad implements WindowListener {
     public JNotepad(JFrame parentFrame) {
         parentFrame.addWindowListener(this);
@@ -87,12 +99,21 @@ public class JNotepad {
         } catch (Exception e) {
             // System look and feel is always present.
         }
-        JFrame frame = new JFrame("JNotepad");
-        new JNotepad(frame);
-        frame.setVisible(true);
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                JFrame frame = new JFrame("JNotepad");
+                new JNotepad(frame);
+                frame.setSize(800, 600);
+                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                frame.setVisible(true);
+            }
+        });
     }
 }
 </code></pre>
+    <p>Remove those 2 lines for size and closing. Now add an interface to your class for <span class="inline-code">javax.swing.event.WindowListener</span>. Swing uses an event based system to communicate to your application what the user is doing. It uses the Producer/Consumer pattern. A Producer, as the name implies, will produce events that it can share with anyone that is interested. A Consumer is an interested party that will want events that a Producer creates. By implementing the <span class="inline-code">WindowListener</span> interface you are enabling your class to become a consumer of windowing events.</p>
     <p>In the constructor parentFrame.addWindowListener(this) tells the application's window that we want to receive all windowing events that it sends out. The <span class="inline-code">WindowListener</span> interface has seven methods. We are only concerned with one, <span class="inline-code">windowClosing(WindowEvent e)</span>. When someone clicks on the "X" to close your window the <span class="inline-code">JFrame</span> will call this method since you subscribed to these events. If you do nothing here the window will close but your application will remain running. So we create a simple method called <span class="inline-code">exit()</span> and add the <span class="inline-code">System.exit(0)</span> call to exit normally. The reason to create a separate method is that later on we will call it from different locations so it is best to have one exit point.</p>
     <p>This still doesn't take care of the window size. The next thing we can do is add a new class that will take care of size, as well as some other things. Create a new class in Eclipse and call it <span class="inline-code">ApplicationPreferences.java</span>. Here is what the class will look like.</p>
 <pre><code class="java">public class ApplicationPreferences {
