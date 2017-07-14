@@ -123,37 +123,45 @@ private String fileName;
 }
 
 private DirtyStatus isDirty() {
-    DirtyStatus result = DirtyStatus.DONT_SAVE_FILE;
-
+    final Map<String, DirtyStatus> result = new HashMap<String, DirtyStatus>();
+    result.put("result", DirtyStatus.DONT_SAVE_FILE);
+    JNotepad self = this;
+    
     if (dirty) {
-        String filePath = (fileName.equals(NEW_FILE_NAME) ? fileName : 
-            ApplicationPreferences.getCurrentFilePath() + FILE_SEPARATOR + fileName);
-        int choice = JOptionPane.showOptionDialog(this, 
-                "Do you want to save changes to " + filePath + "?", 
-                "JNotepad", 
-                JOptionPane.YES_NO_CANCEL_OPTION, 
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                new String[] {"Save", "Don't Save", "Cancel"}, 
-                "Save");
-        if (choice == JOptionPane.YES_OPTION) {
-            result = DirtyStatus.SAVE_FILE;
-        } else if (choice == JOptionPane.NO_OPTION) {
-            result = DirtyStatus.DONT_SAVE_FILE;
-        } else if (choice == JOptionPane.CANCEL_OPTION) {
-            result = DirtyStatus.CANCEL_ACTION;
+        try {
+            SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    int choice = JOptionPane.showConfirmDialog(self, 
+                            "There are changes in the current document.\n" +
+                            "Click 'Yes' to save changes.\n" +
+                            "Click 'No' to discard changes.\n" +
+                            "Click 'Cancel' to stop the current action.", 
+                            "Save Changes?", 
+                            JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+                    if (choice == JOptionPane.YES_OPTION) {
+                        result.put("result", DirtyStatus.SAVE_FILE);
+                    } else if (choice == JOptionPane.NO_OPTION) {
+                        result.put("result", DirtyStatus.DONT_SAVE_FILE);
+                    } else if (choice == JOptionPane.CANCEL_OPTION) {
+                        result.put("result", DirtyStatus.CANCEL_ACTION);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
-
-    return result;
+    
+    return result.get("result");
 }
 
 enum DirtyStatus {
     SAVE_FILE, DONT_SAVE_FILE, CANCEL_ACTION;
 }
 </code></pre>
-    <p>Let’s look at <span class="inline-code">DirtyStatus</span> first. Typically when you check with the user for what they want to do if the current document is not saved and changes are going to be lost you give them three options. They can save the file, not save the file or stop the current action and continue as before. The <span class="inline-code">DirtyStatus</span> enum represents what the user has responded. In any call to <span class="inline-code">isDirty()</span> we want to ask the user what to do, if the document is dirty, and return the appropriate result. This method is set up so that it can be called from multiple different areas in the application, not just when creating a new document. It needs to stay generic enough for that purpose. So we just return what the user would reply to the dialog and each individual area will handle the result. First we set the default value to <span class="inline-code">DONT_SAVE_FILE</span>. If the document is not dirty then we do not want to overwrite the file with what is already there. <span class="inline-code">DONT_SAVE_FILE</span> tells the application to continue with any action without performing any kind of save. Next the dirty flag is checked and if it is set then show the user the dialog. Based on the user’s response we will set the result appropriately.</p>
-    <p>The class <span class="inline-code">javax.swing.JOptionPane</span> is used to show simple basic dialogs to the user. If you have a simple informational message or a question with limited options then this is the way to go. Later on you will also see some custom more complicated dialogs that require custom classes.</p>
+    <p>Let’s look at <span class="inline-code">DirtyStatus</span> first. Typically when you check with the user for what they want to do if the current document is not saved and changes are going to be lost you give them three options. They can save the file, not save the file or stop the current action and continue as before. The <span class="inline-code">DirtyStatus</span> enum represents what the user has responded. In any call to <span class="inline-code">isDirty()</span> we want to ask the user what to do, if the document is dirty, and return the appropriate result. This method is set up so that it can be called from multiple different areas in the application, not just when creating a new document. It needs to stay generic enough for that purpose. So we just return what the user would reply to the dialog and each individual area will handle the result. First we set the default value to <span class="inline-code">DONT_SAVE_FILE</span>. If the document is not dirty then we do not want to overwrite the file with what is already there. <span class="inline-code">DONT_SAVE_FILE</span> tells the application to continue with any action without performing any kind of save. Next the dirty flag is checked and if it is set then show the user the dialog. Based on the user’s response we will set the result appropriately. . Since the dialog is being shown in a separate thread from the main one the result variable is a final map object. It has to be final to be so the reference cannot be changed in a different thread. Since it is a map we can still update the contents. We set our result in the map to be returned when the dialog is closed.</p>
+    <p>The class <span class="inline-code">javax.swing.JOptionPane</span> is used to show simple basic dialogs to the user. If you have a simple informational message or a question with limited options then this is the way to go. Later on you will also see some more complicated dialogs that require custom classes.</p>
     <p>In this case I am using <span class="inline-code">showOptionDialog(Component parentComponent, Object message, String title, int optionType, int messageType, Icon icon, Object[] options, Object initialValue)</span>. Any component can be passed as the <span class="inline-code">parentComponent</span>. This just helps the dialog pop up over the provided component. The second argument is the message you want display to the user. If you pass in a string then that text will be displayed in the dialog. If you pass in a Swing component, that component will be displayed. This allows you to dress up option pane type dialogs. The third is the title that will be in the title bar. The fourth parameter is what options will be shown to the user. In this case I want a Save button, Don’t Save button and Cancel button. The fifth parameter is for the type of message, such as error, question, warning or plain. The type of message will also determine the type of icon to be displayed. For this message it is a plain. The next parameter is an Icon. You can place a custom icon if you wish. If you pass in null then the default icon for the message type will be used. Since we are using the plain message then there will be no icon. The options parameter requires an array of objects. If you pass in components for the options then they will be displayed as components. If you pass in any non-string argument the <span class="inline-code">toString()</span> will be called on each object and displayed as text in a button. In our case we are passing in an array of three strings. Since the number of strings that we are using matches the option type we can use the same constants to check the results. The last argument will highlight the selected value as long as it matches one of the values passed in. If it is set to null then no button will be highlighted. The next image (figure 3-2) shows what the dialog will look like.</p>
     <div class="row">
         <div class="col-md-6">
@@ -207,15 +215,22 @@ enum DirtyStatus {
     }
     
     if (saveSuccessful) {
-        String filePath = ApplicationPreferences.getCurrentFilePath();
-        JFileChooser fileChooser = new JFileChooser(filePath);
-        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-            fileName = selectedFile.getName();
-            ApplicationPreferences.setCurrentFilePath(
-                    selectedFile.getParentFile().getAbsolutePath().replace("\\", "/"));
-            loadFile(selectedFile);
-        }
+        JNotepad self = this;
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                String filePath = ApplicationPreferences.getCurrentFilePath();
+                JFileChooser fileChooser = new JFileChooser(filePath);
+                if (fileChooser.showOpenDialog(self) == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = fileChooser.getSelectedFile();
+                    fileName = selectedFile.getName();
+                    ApplicationPreferences.setCurrentFilePath(
+                            selectedFile.getParentFile().getAbsolutePath()
+                            .replace("\\", "/"));
+                    loadFile(selectedFile);
+                }
+            }
+        });
     }
 }
 </code></pre>
@@ -237,42 +252,64 @@ enum DirtyStatus {
 </code></pre>
     <p>This is the <span class="inline-code">save()</span> method. The first thing we do is check if this document already has a name from a previous load/save operation or if it is a fresh document. If it is fresh the call <span class="inline-code">saveAs()</span> to display the dialog to get a location to save. If the document already has a file path then just save the contents to that file, by calling <span class="inline-code">saveFile(path)</span>. We’ll look at that method shortly. Once the save completes set dirty to false and update the title to reflect that the document has been saved.</p>
 <pre><code class="java">public boolean saveAs() {
-    boolean result = true;
+    Map<String, Boolean> result = new HashMap<String, Boolean>();
+    result.put("result", Boolean.TRUE);
+    JNotepad self = this;
     
-    String filePath = ApplicationPreferences.getCurrentFilePath();
-    JFileChooser fileChooser = new JFileChooser(filePath);
-    if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-        File selectedFile = fileChooser.getSelectedFile();
-        fileName = selectedFile.getName();
-        ApplicationPreferences.setCurrentFilePath(
-                selectedFile.getParentFile().getAbsolutePath().replace("\\", "/"));
-        saveFile(selectedFile.getAbsolutePath());
-        dirty = false;
-        setTitle();
-    } else {
-        result = false;
+    try {
+        SwingUtilities.invokeAndWait(new Runnable() {
+            @Override
+            public void run() {
+                String filePath = ApplicationPreferences.getCurrentFilePath();
+                JFileChooser fileChooser = new JFileChooser(filePath);
+                if (fileChooser.showSaveDialog(self) == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = fileChooser.getSelectedFile();
+                    fileName = selectedFile.getName();
+                    ApplicationPreferences.setCurrentFilePath(
+                            selectedFile.getParentFile().getAbsolutePath()
+                            .replace("\\", "/"));
+                    saveFile(selectedFile.getAbsolutePath());
+                    dirty = false;
+                    setTitle();
+                } else {
+                    result.put("result", Boolean.FALSE);
+                }
+            }
+        });
+    } catch (Exception e) {
+        e.printStackTrace();
+        result.put("result", Boolean.FALSE);
     }
     
-    return result;
+    return result.get("result").booleanValue();
 }
 </code></pre>
     <p>This method will use the now familiar <span class="inline-code">JFileChooser</span> dialog to ask the user to save the file. This time we call <span class="inline-code">showSaveDialog()</span> instead, since we are saving. <span class="inline-code">showSaveDialog()</span> and <span class="inline-code">showOpenDialog()</span> are just convenience methods that call showDialog(Component, String). The String argument is the text that will be displayed on the button that will return APPROVE_OPTION. Save and Open are the most commonly used so adding convenience methods is helpful to the programmer.</p>
     <p>If the user clicked Save we will store the name and path for later use and then call <span class="inline-code">saveFile()</span> with the path to the file. Once the save is complete set the dirty flag to false and update the title.</p>
 <pre><code class="java">private void saveFile(String path) {
-    Writer out = null;
-    
-    try {
-        out = new OutputStreamWriter(new FileOutputStream(path), "UTF-8");
-        out.write(textArea.getText());
-    } catch (UnsupportedEncodingException e) {
-        //UTF-8 is built into Java so this exception should never be thrown
-    } catch (FileNotFoundException e) {
-        JOptionPane.showMessageDialog(this, "Unable to create the file: " + path + "\n" + e.getMessage(), "Error loading file", JOptionPane.ERROR_MESSAGE);
-    } catch (IOException e) {
-        JOptionPane.showMessageDialog(this, "Unable to save the file: " + path, "Error loading file", JOptionPane.ERROR_MESSAGE);
-    } finally {
-        ResourceCleanup.close(out);
-    }
+    JComponent parentComponent = this;
+    SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+            Writer out = null;
+            
+            try {
+                out = new OutputStreamWriter(new FileOutputStream(path), 
+                        StandardCharsets.UTF_8);
+                out.write(textArea.getText());
+            } catch (FileNotFoundException e) {
+                JOptionPane.showMessageDialog(parentComponent, 
+                        "Unable to create the file: " + path + "\n" + e.getMessage(), 
+                        "Error loading file", JOptionPane.ERROR_MESSAGE);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(parentComponent, 
+                        "Unable to save the file: " + path, 
+                        "Error loading file", JOptionPane.ERROR_MESSAGE);
+            } finally {
+                ResourceCleanup.close(out);
+            }
+        }
+    });
 }
 </code></pre>
     <p>Both <span class="inline-code">save()</span> and <span class="inline-code">saveAs()</span> call <span class="inline-code">saveFile(String path)</span> to do the work of the actual save. The first two perform the calculations and user interactions to make sure a save is going to happen. Once it does happen then we finally perform the save.</p> 
@@ -301,21 +338,35 @@ enum DirtyStatus {
     if (printRequestAttributeSet == null) {
         printRequestAttributeSet = new HashPrintRequestAttributeSet();
     }
-    PrinterJob.getPrinterJob().pageDialog(printRequestAttributeSet);
+    
+    SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+            PrinterJob.getPrinterJob().pageDialog(printRequestAttributeSet);
+        }
+    });
 }
 </code></pre>
     <p>Java provides a class to access the print functionality called <span class="inline-code">java.awt.print.PrinterJob</span>. First check to see if we already have some user settings stored. If not then create an empty set that will be populated by the print dialog. The method <span class="inline-code">getPrinterJob()</span> is a static method that creates an instance of PrinterJob that will be tied to OS resources for the printer. Calling <span class="inline-code">pageDialog(printRequestAttributeSet)</span> will show a dialog to the user to change basic settings for margins and paper choice. By passing in our <span class="inline-code">PrintAttributeSet</span>, the user settings will be store there.</p>
 <pre><code class="java">public void doPrint() {
-    try {
-        textArea.print(null, 
-                new MessageFormat("page {0}"), 
-                true, 
-                PrinterJob.getPrinterJob().getPrintService(), 
-                printRequestAttributeSet, 
-                true);
-    } catch (PrinterException e) {
-        e.printStackTrace();
+    if (printRequestAttributeSet == null) {
+        printRequestAttributeSet = new HashPrintRequestAttributeSet();
     }
+    SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+            try {
+                textArea.print(null, 
+                        new MessageFormat("page {0}"), 
+                        true, 
+                        PrinterJob.getPrinterJob().getPrintService(), 
+                        printRequestAttributeSet, 
+                        true);
+            } catch (PrinterException e) {
+                e.printStackTrace();
+            }
+        }
+    });
 }
 </code></pre>
     <p>The <span class="inline-code">doPrint()</span> method is called when the user selects print from the file menu. For basic printing it is pretty simple. Just call the <span class="inline-code">print(MessageFormat headerFormat, MessageFormat footerFormat, boolean showPrintDialog, PrintService service, PrintRequestAttributeSet attributes, boolean interactive)</span> method on the <span class="inline-code">JTextArea</span> that contains our content. There are three different <span class="inline-code">print()</span> methods that can be used. We are going to use the one that has 6 parameters. The first two are used if you want a header and/or a footer. If you don't want them you can set them to null. We don't want a header so we will set it to null. For the footer we'll set it up to print the page number. Both these options use the <span class="inline-code">java.text.MessageFormat</span> class to encode the text. The full codes that you can use are in the Java Doc for this class. For our case we are using {0}, which tells the formatter to insert the first argument into the message string. For the footer this is the page number.</p>
@@ -345,4 +396,3 @@ enum DirtyStatus {
         <div class="col-md-4 col-sm-1"><span class="pull-right"><a href="/startingswing/page.php?page=chap4">Edit Menu</a></span></div>
     </div>
 </div>
-    
