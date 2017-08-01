@@ -41,13 +41,18 @@ textArea.getDocument().addUndoableEditListener(undoManager);
 </code></pre>
     <p>In the loadFile() method we need to add the reset right after setting the new content.</p>
 <pre><code class="java">public void cut() {
-    int start = textArea.getSelectionStart();
-    textArea.cut();
-    textArea.setSelectionStart(start);
-    textArea.setSelectionEnd(start);
+    SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+            int start = textArea.getSelectionStart();
+            textArea.cut();
+            textArea.setSelectionStart(start);
+            textArea.setSelectionEnd(start);
+        }
+    });
 }
 </code></pre>
-    <p>All the cut option needs is a method for the action to call. It is slightly more complicated than it needs to be due to the way Swing handles cut. If you just call cut() on a JTextArea the piece of selected text will be cut but the selection won’t be cleared. The extra code is there to clear the selection after the cut has been performed. The cut() method in JTextArea places the text in the system clipboard so it will be available to all applications, not just your Swing app.</p>
+    <p>All the cut option needs is a method for the action to call. It is slightly more complicated than it needs to be due to the way Swing handles cut. If you just call cut() on a JTextArea the piece of selected text will be cut but the selection won’t be cleared. The extra code is there to clear the selection after the cut has been performed. The cut() method in JTextArea places the text in the system clipboard so it will be available to all applications, not just your Swing app. We also need to send this code to the EDT since we are manipulating the GUI. I won’t mention it again but just be aware when you see SwingUtilities.invokeLater().</p>
 <pre><code class="java">public void paste() {
     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
     DataFlavor[] flavors = clipboard.getAvailableDataFlavors();
@@ -59,33 +64,38 @@ textArea.getDocument().addUndoableEditListener(undoManager);
 }
 
 private void performPaste(DataFlavor flavor, Clipboard clipboard) {
-    try {
-        String data = (String)clipboard.getData(flavor);
-        int start = textArea.getSelectionStart();
-        int end = textArea.getSelectionEnd();
-        int length = end - start;
-        Document doc = textArea.getDocument();
-        try {
-            if (length &gt; 0) {
-                doc.remove(start, length);
+    SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+            try {
+                String data = (String)clipboard.getData(flavor);
+                int start = textArea.getSelectionStart();
+                int end = textArea.getSelectionEnd();
+                int length = end - start;
+                Document doc = textArea.getDocument();
+                try {
+                    if (length > 0) {
+                        doc.remove(start, length);
+                    }
+                    doc.insertString(start, data, null);
+                    int location = start + data.length();
+                    textArea.setSelectionStart(location);
+                    textArea.setSelectionEnd(location);
+                } catch (BadLocationException e) {
+                    //looks like there is nothing to remove
+                    //if a mistake occurs we can still try standard paste
+                    textArea.paste();
+                }
+            } catch (UnsupportedFlavorException e) {
+                // generally this should not happen since we checked before hand if the flavor passed in was available.
+                //if a mistake occurs we can still try standard paste
+                textArea.paste();
+            } catch (IOException e) {
+                //if a mistake occurs we can still try standard paste
+                textArea.paste();
             }
-            doc.insertString(start, data, null);
-            int location = start + data.length();
-            textArea.setSelectionStart(location);
-            textArea.setSelectionEnd(location);
-        } catch (BadLocationException e) {
-            //looks like there is nothing to remove
-            //if a mistake occurs we can still try standard paste
-            textArea.paste();
         }
-    } catch (UnsupportedFlavorException e) {
-        // generally this should not happen since we checked before hand if the flavor passed in was available.
-        //if a mistake occurs we can still try standard paste
-        textArea.paste();
-    } catch (IOException e) {
-        //if a mistake occurs we can still try standard paste
-        textArea.paste();
-    }
+    });
 }
 </code></pre>
     <p>The paste command is made more complicated for the same reason cut is. If you make a selection and then paste into that selection, it will be replaced by the pasted text but the selection will remain. This is not the behaviour we want in our application so we will have to write our own.</p>
@@ -93,13 +103,18 @@ private void performPaste(DataFlavor flavor, Clipboard clipboard) {
     <p>In performPaste() we will get the text from the clipboard, check and store the selection area with the length of selection. If there is no selection then start and end will be the same and length will be zero. Once we get all that we need to get the Document from the JTextArea. Now we are ready to do some work. First if there is a selection then remove the text in the selection. Next insert the text from the clipboard into the current location. Move the location of the cursor to the end of the pasted text.</p>
     <p>There are a number of exceptions declared here but in the majority of cases they should not occur. The BadLocationException should not happen since we retrieved all our values directly from the document. The UnsupportedFlavorException shouldn’t occur because we are only using a DataFlavor that was available in the clipboard. The IOException would only occur if there is an issue communicating with the OS clipboard. Just in case they do occur we will fall back to the default paste on the JTextArea.</p>
 <pre><code class="java">public void delete() {
-    int start = textArea.getSelectionStart();
-    int end = textArea.getSelectionEnd();
-    if (start != end) {
-        textArea.replaceRange("", start, end);
-        textArea.setSelectionEnd(start);
-        textArea.setSelectionStart(start);
-    }
+    SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+            int start = textArea.getSelectionStart();
+            int end = textArea.getSelectionEnd();
+            if (start != end) {
+                textArea.replaceRange("", start, end);
+                textArea.setSelectionEnd(start);
+                textArea.setSelectionStart(start);
+            }
+        }
+    });
 }
 </code></pre>
     <p>Delete is pretty much the same as cut. The only difference is that delete will not place the selection into the clipboard, it will just be removed from the text. We just have to remember that once we remove the text, we also have to clear the selection and place the cursor at the beginning of the area that was selected. If we set the selection start and end at the same position then nothing will be selected and the cursor will be placed at the same location.</p>
@@ -511,8 +526,14 @@ public boolean isMatchCase() {
     <p>When the direction is down we want to set the start location of our search to the end of any selection that has been made. This is especially important since a lot of the time we may be coming here right after the user has already found and highlighted one term already. If the term we are searching for is already highlighted and we set the start point to the beginning of the selection then we will just find the same term we already found. Next we’ll pull the text out of the text area and change it to lower case if matchCase is not selected. Next we’ll use the indexOf() method in the String class to look for our findTerm beginning where we want it to. indexOf() will return -1 if no occurrence was found. If something is found we will highlight the occurrence by setting the selection start and end appropriately.</p>
     <p>If the direction is up we want to set our start point to the selection start, since we will be working backwards. Once we have our start point we will only pull out the text from the beginning of the document to the start point. If necessary we will switch it to lowercase. Then we will find the last occurrence in the search area. Since we are only take a working section of text as opposed to the whole thing then get the last occurrence in the selection portion is the same as searching backward. Again we check for -1 to see if there is a result or not and then highlight the term appropriately.</p>
 <pre><code class="java">public void replace() {
-    SearchDialog dialog = new SearchDialog(parentFrame, this, true);
-    dialog.setVisible(true);
+    JNotepad self = this;
+    SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+            SearchDialog dialog = new SearchDialog(parentFrame, self, true);
+            dialog.setVisible(true);
+        }
+    });
 }
 </code></pre>
     <p>The replace() method is called from the Edit -> Replace menu selection. It is practically identical to the find() method. The only difference is passing in true as the third parameter to tell SearchDialog that we want the replace dialog instead of the find dialog. You have seen all the code for the replace dialog, the only thing you haven’t seen is what it looks like. Here is a screenshot of the replace dialog.</p>
@@ -568,19 +589,26 @@ public boolean isMatchCase() {
     <p>This method works that same as the previous replace method except that instead of an “if” statement checking the selection we use a while loop. We will continue calling findNext() and looping until nothing is found. If findNext() doesn’t find anything then nothing will be highlighted and the while loop will exit.</p>
     <p>Edit -> Go To is the next item to look at. It has a method call in our main application and a custom dialog. Let’s look the method call first.</p>
 <pre><code class="java">public void goTo() {
-    GoToDialog goToDialog = new GoToDialog(parentFrame, this);
-    if (goToDialog.showDialog()) {
-        int lineNumber = goToDialog.getLineNumber() - 1;
-        
-        if (lineNumber &gt;= 0 &amp;&amp; lineNumber &lt;= textArea.getLineCount()) {
-            try {
-                textArea.setCaretPosition(textArea.getLineStartOffset(lineNumber));
-            } catch (BadLocationException e) {
-                // should not occur since we already checked if the lineNumber is in range.
-                e.printStackTrace();
+    JNotepad self = this;
+    SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+            GoToDialog goToDialog = new GoToDialog(parentFrame, self);
+            if (goToDialog.showDialog()) {
+                int lineNumber = goToDialog.getLineNumber() - 1;
+                
+                if (lineNumber &gt;= 0 &amp;&amp; lineNumber &lt;= textArea.getLineCount()) {
+                    try {
+                        textArea.setCaretPosition(textArea.getLineStartOffset(lineNumber));
+                    } catch (BadLocationException e) {
+                        // should not occur since we already 
+                        // checked if the lineNumber is in range.
+                        e.printStackTrace();
+                    }
+                }
             }
         }
-    }
+    });
 }
 </code></pre>
     <p>First we create an instance of our custom dialog passing in a reference to the main application frame and our main application. Next we call the method showDialog() on our dialog. This is a custom method that will be explained when we look at the dialog code. From this side this method will return false if the user cancels or closes the dialog. It will return true if they enter a line number and click the Go To button.</p>
@@ -703,18 +731,28 @@ cancelButton.addActionListener(new ActionListener() {
 </code></pre>
     <p>This is our filter for the text field. First we set up a regular expression that will only accept numbers. Next we override both insertString(FilterBypass fb, int offset, String string, AttributeSet attr) and replace(FilterBypass fb, int offset, String string, AttributeSet attr) methods from javax.swing.text.DocumentFilter. One of these methods on the filter is called every time a character typed into a text field. Since we replaced the filter with our own and overrode those two methods we can control the allowed characters. All we do is check if it is a numberic value and continue with the insert if it is, otherwise reject it. Notice to allow the character into the document we use the javax.swing.text.DocumentFilter.FilterBypass class. If we didn’t use this class and tried to insert into the document directly it would go through the filter again in an infinite loop.</p>
 <pre><code class="java">public void selectAll() {
-    textArea.setSelectionStart(0);        
-    textArea.setSelectionEnd(textArea.getText().length());        
+    SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+            textArea.setSelectionStart(0);        
+            textArea.setSelectionEnd(textArea.getText().length());
+        }
+    });
 }
 </code></pre>
     <p>For Edit -> Select All there is not much to say. Selection is supported by JTextArea so you just have to tell it where to start and end the selection and it will highlight it for you.</p>
 <pre><code class="java">private static final DateFormat DATE_FORMAT = new SimpleDateFormat("hh:mm aa yyyy-MM-dd");
 
 public void timeDate() {
-    String timeDateString = DATE_FORMAT.format(new Date());
-    int start = textArea.getSelectionStart();
-    textArea.replaceSelection(timeDateString);
-    textArea.setCaretPosition(start + timeDateString.length());
+    SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+            String timeDateString = DATE_FORMAT.format(new Date());
+            int start = textArea.getSelectionStart();
+            textArea.replaceSelection(timeDateString);
+            textArea.setCaretPosition(start + timeDateString.length());
+        }
+    });
 }
 </code></pre>
     <p>There is not much more to Edit -> Time/Date. Just set up a DateFormat instance to perform the formatting as needed. The formatting is not going to change from use to use so we can just make it a constant. First we store the current date and time in a string. Then we see where the cursor is. We call replaceSelection(timeDateString) with our date string. If no text is selected then replaceSelection(timeDateString) will just insert the text at the current cursor position. Once the date string is inserted we move the cursor to the end of the insertion point.</p>
