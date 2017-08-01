@@ -1,5 +1,9 @@
 <?php
-$page = htmlspecialchars($_GET["page"]);
+if (isset($_GET["page"])) {
+    $page = htmlspecialchars($_GET["page"]);
+} else {
+    $page = "contents";
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -21,9 +25,9 @@ $page = htmlspecialchars($_GET["page"]);
         <div class="row">
             <div class="col-md-12">
                 <div id="content" class="panel panel-primary">
-					<?php
-					include $page.".php";
-					?>
+                    <?php
+                    include $page.".php";
+                    ?>
                 </div>
             </div>
         </div>
