@@ -66,8 +66,13 @@
 </code></pre>
 <p>Here we set up the menu selections as before but you should notice a new class being used, javax.swing.JCheckBoxMenuItem. As the name indicates this will toggle a checkmark beside the menu item as the user clicks the option. Also by calling set selected to true or false we can programmatically display or clear the checkmark. Here we will call up the stored word wrap value and call setSelected(ApplicationPreferences.isWordWrap()) with that value. We also set up the actions in the standard way. There is nothing new with this action so I won’t show the code.</p>
 <pre><code class="java">public void wordWrap() {
-    ApplicationPreferences.setWordWrap(!ApplicationPreferences.isWordWrap());
-    textArea.setLineWrap(ApplicationPreferences.isWordWrap());
+    SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+            ApplicationPreferences.setWordWrap(!ApplicationPreferences.isWordWrap());
+            textArea.setLineWrap(ApplicationPreferences.isWordWrap());
+        }
+    });
 }
 </code></pre>
 <p>This is the method that is called by the user clicking on the menu option. We simply invert the boolean value for word wrap and set the text area word wrapping to the value stored in word wrap.</p>
@@ -81,15 +86,19 @@
         </div>
     </div>
 <pre><code class="java">public void font() {
-    FontDialog fontDialog = new FontDialog(parentFrame, 
-        this, 
-        ApplicationPreferences.getCurrentFont());
-    if (fontDialog.showFontDialog()) {
-        Font selectedFont = fontDialog.getSelectedFont();
-        ApplicationPreferences.setCurrentFont(selectedFont);
-        textArea.setFont(selectedFont);
-    }
-    fontDialog.dispose();
+    SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+            FontDialog fontDialog = new FontDialog(parentFrame, 
+                    ApplicationPreferences.getCurrentFont());
+            if (fontDialog.showFontDialog()) {
+                Font selectedFont = fontDialog.getSelectedFont();
+                ApplicationPreferences.setCurrentFont(selectedFont);
+                textArea.setFont(selectedFont);
+            }
+            fontDialog.dispose();
+        }
+    });
 }
 </code></pre>
 <p>First we create an instance of our custom FontDialog. We need to pass in a reference to the application frame, JNotepad and the current font. Next we’ll call the custom method showFontDialog(). I’ll show the code for that later. For now you just need to know that if the user clicks the OK button then the dialog will close and this method will return true. If the user clicks Cancel or clicks the ‘X’ to close the dialog then it will return false.</p>

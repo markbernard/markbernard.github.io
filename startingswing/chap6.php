@@ -44,15 +44,21 @@ private JLabel positionLabel;
 </code></pre>
     <p>Here we’ll create the panel that will become the status bar. We only have one item to make for the status bar and that is an indicator for the line and column that the cursor is at. The positionLabel will take care of that. Once the status bar is ready we’ll check to see if it should be visible. If so we’ll add it to the main application window at the bottom. Lastly we need to call the method updateStatusBar(textArea.getCaretPosition()) with position of the caret. We’ll define that method shortly. The getCaretPosition() method returns a single integer indicating where in the string the next typed character would be inserted.</p>
 <pre><code class="java">private void updateStatusBar(int position) {
-    try {
-        int line = textArea.getLineOfOffset(position);
-        int column = position - textArea.getLineStartOffset(line);
-        positionLabel.setText(String.format("Ln %d, Col %d", (line + 1), (column + 1)));
-    } catch (Exception e) {
-        //not critical if the position in the
-        //status bar does not get updated.
-        e.printStackTrace();
-    }
+    SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+            try {
+                int line = textArea.getLineOfOffset(position);
+                int column = position - textArea.getLineStartOffset(line);
+                positionLabel.setText(String.format("Ln %d, Col %d", 
+                        (line + 1), (column + 1)));
+            } catch (Exception e) {
+                //not critical if the position in the
+                //status bar does not get updated.
+                e.printStackTrace();
+            }
+        }
+    });
 }
 </code></pre>
     <p>The JTextArea class provides methods to figure out where in the visible text area the cursor is, based on the position within the string that it is at. The first method, getLineOfOffset(position) is pretty self-explanatory. It just returns which line it is on. The method getLineStartoffset(line) will give the position within the string that the provided line number starts on. If we take the current position that was passed into this method and subtract the value of the line start offset we will get which column we are on. The last thing we do here is update the label with the information we just calculated. Since the numbers we get are zero based we need to add one to each to give a proper value for the user. The methods that we use her from JTextArea throw a checked exception if the value passed in is out of bounds for the data that it has. Since all these values are calculated and not arbitrary we don’t have to worry about doing anything with the exception.</p>

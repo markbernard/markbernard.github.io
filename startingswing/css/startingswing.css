@@ -59,3 +59,7 @@ figcaption {
 .foot-nav {
 	font-size: 0.7em;
 }
+
+.chapter-list {
+	list-style-type: decimal;
+}
