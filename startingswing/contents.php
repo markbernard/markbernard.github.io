@@ -10,11 +10,11 @@
         <li><a href="/startingswing/page.php?page=chap3">File Menu</a></li>
         <li><a href="/startingswing/page.php?page=chap4">Edit Menu</a></li>
         <li><a href="/startingswing/page.php?page=chap5">Format Menu</a></li>
-        <li><a href="/startingswing/page.php?page=chap6">View and Help</a></li>
+        <li><a href="/startingswing/page.php?page=chap6">View &amp; Help</a></li>
     </ol>
     <h3>Part 2 - Extending the Application</h3>
     <ol class="chapter-list" start="7">
-        <li><a href="/startingswing/page.php?page=chap7">Toolbars</a></li>
+        <li><a href="/startingswing/page.php?page=chap7">Toolbar &amp; Status Bar</a></li>
     </ol>
 </div>
 <div class="panel-footer foot-nav">

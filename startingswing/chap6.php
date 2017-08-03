@@ -1,5 +1,5 @@
 <div class="panel-heading">
-    <h2 class="panel-title chapter-heading">View & Help Menu</h2>
+    <h2 class="panel-title chapter-heading">View &amp; Help Menu</h2>
 </div>
 <div class="panel-body scroll">
     <div class="row">
@@ -30,7 +30,7 @@ private JLabel positionLabel;
     createStatusBar();
 }
 </code></pre>
-    <p>Next well call a method, which we will create, from the constructor to create the status bar.</p>
+    <p>Next we'll call a method, which we will create, from the constructor to create the status bar.</p>
 <pre><code class="java">private void createStatusBar() {
     statusBarPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     positionLabel = new JLabel();
@@ -110,6 +110,6 @@ private JLabel positionLabel;
     <div class="row">
         <div class="col-md-4 col-sm-1"><a href="/startingswing/page.php?page=chap5">Format Menu</a></div>
         <div class="col-md-4 col-sm-1 text-center"><a href="/startingswing/page.php?page=contents">Contents</a></div>
-        <div class="col-md-4 col-sm-1"><span class="pull-right"><a href="/startingswing/page.php?page=chap7">Toolbar</a></span></div>
+        <div class="col-md-4 col-sm-1"><span class="pull-right"><a href="/startingswing/page.php?page=chap7">Toolbar &amp; Status Bar</a></span></div>
     </div>
 </div>
