@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Starting Swing - Online</title>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/startingswing/css/startingswing.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.11.0/styles/default.min.css" />
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Starting Swing</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div id="content" class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h2 class="panel-title chapter-heading">Showing a Window</h2>
+                    </div>
+                    <div class="panel-body scroll">
+                        <p>All GUI applications should start by showing something to the user. In Swing, the class <span class="inline-code">javax.swing.JFrame</span>, lets you do that. Let’s start with that.</p>
+                    <pre><code class="java">import javax.swing.JFrame;
+                    import javax.swing.UIManager;
+                    
+                    public class JNotepad {
+                        public static void main(String[] args) {
+                            try {
+                                // Make the application look native.
+                                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                            } catch (Exception e) {
+                                // System look and feel is always present.
+                            }
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    JFrame frame = new JFrame("JNotepad");
+                                    frame.setVisible(true);
+                                }
+                            });
+                        }
+                    }
+                    </code></pre>
+                        <p>The first thing you see here is <span class="inline-code">UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())</span>. Swing uses a system of drawing called Pluggable Look and Feel (PLAF). PLAF is a very advanced topic so it won't be covered here. If you want more information there is a lot on the Internet. This just tells Swing to use a PLAF that matches the OS you are running on so your application can look like Windows if it is running on Windows or Mac for Mac or Linux for Linux. When using the system look and feel you can effectively ignore the exception that could be thrown, since the system look and feel is always present. You will also notice <span class="inline-code">SwingUtilities.invokeLater(Runnable doRun)</span>. Swing GUI elements are not thread safe. There is a special thread, that I’ll discuss later, called the Event Dispatch Thread (EDT). Any manipulations done by the Swing system occur there. Any changes that you are going to make to the GUI should only occur on the EDT to ensure that they do not interfere with regular Swing events/changes. Placing your GUI code inside a <span class="inline-code">java.lang.Runnable</span> object and passing that into <span class="inline-code">SwingUtilities.invokeLater(Runnable doRun)</span> will ensure that the code in the <span class="inline-code">Runnable</span> object will execute on the EDT. This is also where we will create the JFrame. This is where I will always create it.</p>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <figure>
+                                    <img class="img-responsive" src="/startingswing/res/figure1-1.png" width="100%" alt="Figure 1-1: Window with no sizes applied" title="Figure 1-1: Window with no sizes applied" />
+                                    <figcaption><strong>Figure 1-1:</strong> Window with no sizes applied</figcaption>
+                                </figure>
+                            </div>
+                        </div>
+                        <p>Now if you try to run that as it is you won't see much. In fact you see a tiny sliver of a window up in the top left corner of your screen (Figure 1-1).</p>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <figure>
+                                    <img class="img-responsive" src="/startingswing/res/figure1-2.png" width="100%" alt="Figure 1-2: Window after manual resizing" title="Figure 1-2: Window after manual resizing" />
+                                    <figcaption><strong>Figure 1-2:</strong> Window after manual resizing</figcaption>
+                                </figure>
+                            </div>
+                        </div>
+                        <p>Then once you expand it you will see that it is indeed a window (Figure 1-2).</p>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <figure>
+                                    <img class="img-responsive" src="/startingswing/res/figure1-3.png" width="100%" alt="Figure 1-3: Eclipse console" title="Figure 1-3: Eclipse console" />
+                                    <figcaption><strong>Figure 1-3:</strong> Eclipse console</figcaption>
+                                </figure>
+                            </div>
+                        </div>
+                        <p>If you close it, it will disappear but when you check the console of your IDE (I use Eclipse) you will see your program still running. You will need to stop it manually for now (Figure 1-3).</p>
+                    <pre><code class="java">public static void main(String[] args) {
+                         .
+                         .
+                         .
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                 .
+                                 .
+                                 .
+                                frame.setSize(800, 600);
+                                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                                frame.setVisible(true);
+                            }
+                        });
+                    }
+                    </code></pre>
+                        <p>Here is an immediate fix for the size and closing problem. If you run with those changes you can now see the window clearly and exit the program when you close the window.</p>
+                        <p>This setup for size and closing is just done to show a simple way of creating a window. Once you get into a full application you will want more control over these things so you can make your application more user friendly. Let’s get started with that right now.</p>
+                    <pre><code class="java">public class JNotepad implements WindowListener {
+                        public JNotepad(JFrame parentFrame) {
+                            parentFrame.addWindowListener(this);
+                        }
+                    
+                        public void windowActivated(WindowEvent e) {}
+                        public void windowClosed(WindowEvent e) {}
+                    
+                        public void windowClosing(WindowEvent e) {
+                            exit();
+                        }
+                    
+                        public void windowDeactivated(WindowEvent e) {}
+                        public void windowDeiconified(WindowEvent e) {}
+                        public void windowIconified(WindowEvent e) {}
+                        public void windowOpened(WindowEvent e) {}
+                    
+                        private void exit() {
+                            System.exit(0);
+                        }
+                    
+                        public static void main(String[] args) {
+                            try {
+                                // Make the application look native.
+                                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                            } catch (Exception e) {
+                                // System look and feel is always present.
+                            }
+                    
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    JFrame frame = new JFrame("JNotepad");
+                                    new JNotepad(frame);
+                                    frame.setSize(800, 600);
+                                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                                    frame.setVisible(true);
+                                }
+                            });
+                        }
+                    }
+                    </code></pre>
+                        <p>Remove those 2 lines for size and closing. Now add an interface to your class for <span class="inline-code">javax.swing.event.WindowListener</span>. Swing uses an event based system to communicate to your application what the user is doing. It uses the Producer/Consumer pattern. A Producer, as the name implies, will produce events that it can share with anyone that is interested. A Consumer is an interested party that will want events that a Producer creates. By implementing the <span class="inline-code">WindowListener</span> interface you are enabling your class to become a consumer of windowing events.</p>
+                        <p>In the constructor parentFrame.addWindowListener(this) tells the application's window that we want to receive all windowing events that it sends out. The <span class="inline-code">WindowListener</span> interface has seven methods. We are only concerned with one, <span class="inline-code">windowClosing(WindowEvent e)</span>. When someone clicks on the "X" to close your window the <span class="inline-code">JFrame</span> will call this method since you subscribed to these events. If you do nothing here the window will close but your application will remain running. So we create a simple method called <span class="inline-code">exit()</span> and add the <span class="inline-code">System.exit(0)</span> call to exit normally. The reason to create a separate method is that later on we will call it from different locations so it is best to have one exit point.</p>
+                        <p>This still doesn't take care of the window size. The next thing we can do is add a new class that will take care of size, as well as some other things. Create a new class in Eclipse and call it <span class="inline-code">ApplicationPreferences.java</span>. Here is what the class will look like.</p>
+                    <pre><code class="java">public class ApplicationPreferences {
+                        private static final String WINDOW_X = "window.x";
+                        private static final String WINDOW_Y = "window.y";
+                        private static final String WINDOW_WIDTH = "window.width";
+                        private static final String WINDOW_HEIGHT = "window.height";
+                        private static final String WINDOW_MAXIMIZED = "window.maximized";
+                    
+                        public static void loadPrefs(JFrame frame) {
+                            Preferences prefs = Preferences.userNodeForPackage(ApplicationPreferences.class);
+                            frame.setBounds(prefs.getInt(WINDOW_X, 0),
+                                    prefs.getInt(WINDOW_Y, 0),
+                                    prefs.getInt(WINDOW_WIDTH, 800),
+                                    prefs.getInt(WINDOW_HEIGHT, 600));
+                            if (prefs.getBoolean(WINDOW_MAXIMIZED, false)) {
+                                frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                            }
+                        }
+                    
+                        public static void savePrefs(JFrame frame) {
+                            Preferences prefs = Preferences.userNodeForPackage(ApplicationPreferences.class);
+                    
+                            if (frame.getExtendedState() == JFrame.MAXIMIZED_BOTH) {
+                                prefs.putBoolean(WINDOW_MAXIMIZED, true);
+                            } else {
+                                prefs.putBoolean(WINDOW_MAXIMIZED, false);
+                                prefs.putInt(WINDOW_X, frame.getX());
+                                prefs.putInt(WINDOW_Y, frame.getY());
+                                prefs.putInt(WINDOW_WIDTH, frame.getWidth());
+                                prefs.putInt(WINDOW_HEIGHT, frame.getHeight());
+                            }
+                        }
+                    }
+                    </code></pre>
+                        <p>The standard Java library provides a nice API for saving small details about your application as user specific or application specific values. The class to use is <span class="inline-code">java.util.Preferences</span>. At the beginning of this class we declare five constant strings that will represent the keys for the values we are going to save. We are going to save the position and the size of the window as well as whether it is maximized or not.</p>
+                        <p>If we look at <span class="inline-code">loadPrefs(JFrame frame)</span> first, this will be the first use of Preferences when your application starts for the first time when a new user uses it or an existing user starts it up again. There are two static methods that we are concerned with right now. One is <span class="inline-code">userNodeForPackage(Class&lt;?&gt; c)</span> and the other is <span class="inline-code">systemNodeForPackage(Class&lt;?&gt; c)</span>. The <span class="inline-code">systemNodeForPackage(Class&lt;?&gt; c)</span> accepts a class as its only argument. It will return a preferences instance that will save values globally for your application. You can save multiple global positions by passing in difference class definitions in each call. In our little application we do not need that much varying storage. We also don't need application wide values.</p>
+                        <p>In the code you can see that we use <span class="inline-code">userNodeForPackage(ApplicationPreferences.class)</span> since we want individual values for each user. We pass in the <span class="inline-code">ApplicationPreferences</span> class as this method's argument. This will be the only class that we will use for user level values. Once we have our instance of the <span class="inline-code">Preferences</span> class we want to read values from the preferences storage. One method we call is <span class="inline-code">getInt(String key, int def)</span> with two arguments. The first argument is the key that we want to read from. The second argument is a default value to return if the key does not exist. In our case we are going to set the window size and location to x=0, y=0, width=800 and height=600. Next we do not want to maximize the window at first so we will return false as the default for a maximized window. We also pass in a reference to the <span class="inline-code">JFrame</span> object here. This allows us to directly set the values that we need to set.</p>
+                        <p>The next method to look at is <span class="inline-code">savePrefs(JFrame frame)</span>. We also pass in the JFrame instance here as well so we can read the values that we want to save. Notice that when we check if the window is maximized we only store that maximized state if it is true. We don't want to overwrite the standard state sizes. If we try to read them when the window is maximized they will return the full screen size instead of the non-maximized location.</p>
+                    <pre><code class="java">public JNotepad(JFrame parentFrame) {
+                        this.parentFrame = parentFrame;
+                        ApplicationPreferences.loadPrefs(parentFrame);
+                        parentFrame.addWindowListener(this);
+                    }
+                    </code></pre>
+                        <p>Now we just need to add the calls to get this working. Inside the <span class="inline-code">JNotepad</span> constructor load our preferences.</p>
+                    <pre><code class="java">private void exit() {
+                        ApplicationPreferences.savePrefs(parentFrame);
+                        System.exit(0);
+                    }
+                    </code></pre>
+                        <p>Then inside the exit method we save our preferences. This is the reason for a single exit point. We want to save the users current settings. Later on we will also need to perform some cleanup operations like checking if the user forgot to save after making changes.</p>
+                    </div>
+                    <div class="panel-footer foot-nav">
+                        <div class="row">
+                            <div class="col-md-4 col-sm-1"><a href="/startingswing/page.php?page=intro">Introduction</a></div>
+                            <div class="col-md-4 col-sm-1 text-center"><a href="/startingswing/page.php?page=contents">Contents</a></div>
+                            <div class="col-md-4 col-sm-1"><span class="pull-right"><a href="/startingswing/page.php?page=chap2">Editing Area</a></span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.11.0/highlight.min.js"></script>
+    <script src="/startingswing/js/startingswing.js" type="text/javascript"></script>
+</body>
+</html>
