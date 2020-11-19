@@ -148,13 +148,13 @@ private boolean cancelled;
                     <p>Next are the three list components that we will use to present the lists of options to the user. There are also three corresponding text fields. The FontSample is an internal class we’ll define later on that will be used to show a sample of what the font looks like as the user makes choices.</p>
                     <p>We will also declare three fields to hold the last value that the user has selected. There are points where we may be in transition while the user makes a selection so these fields will only be updated when a selection is completed. This is important since the user may click the Ok button before completing a selection. If they do that we may end up with an exception thrown trying to create a font out of invalid data. By maintaining the last completed selection we can prevent any error from occurring in this case. The cancelled field is set to true when the user clicks Cancel or the ‘X’ to close the dialog.</p>
                     <pre><code class="java">public FontDialog(JFrame owner, Font currentFont) {
-super(owner, "Font", true);
-cancelled = true;
-addWindowListener(this);
-setResizable(false);
-setLayout(new BorderLayout());
-JPanel mainPanel = new JPanel(new BorderLayout());
-add(mainPanel, BorderLayout.CENTER);
+    super(owner, "Font", true);
+    cancelled = true;
+    addWindowListener(this);
+    setResizable(false);
+    setLayout(new BorderLayout());
+    JPanel mainPanel = new JPanel(new BorderLayout());
+    add(mainPanel, BorderLayout.CENTER);
                     </code></pre>
                     <p>Here is the constructor. We need a reference to the JFrame for the application so we can tie the dialog to it. We also want to have the font that is currently being used so we can show it in the highlighted selections. We call the parent class with the information it needs. We give it the application window, the title for the title bar and that we want this dialog to be modal.</p>
                     <p>Next we set cancelled to true in case some unforeseen exception causes the dialog to close we want to make sure incomplete data is not used to try to create a font. We add the WindowListener so we can make sure that if the user closes the dialog with the ‘X’ that we can make sure that it is marked as cancelled. The dialog is set to not be resizable so we can better control how it looks.</p>
