@@ -73,21 +73,21 @@ public class JNotepad {
                         </div>
                         <p>If you close it, it will disappear but when you check the console of your IDE (I use Eclipse) you will see your program still running. You will need to stop it manually for now (Figure 1-3).</p>
                     <pre><code class="java">public static void main(String[] args) {
-                         .
-                         .
-                         .
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                 .
-                                 .
-                                 .
-                                frame.setSize(800, 600);
-                                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                                frame.setVisible(true);
-                            }
-                        });
-                    }
+     .
+     .
+     .
+    SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+             .
+             .
+             .
+            frame.setSize(800, 600);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setVisible(true);
+        }
+    });
+}
                     </code></pre>
                         <p>Here is an immediate fix for the size and closing problem. If you run with those changes you can now see the window clearly and exit the program when you close the window.</p>
                         <p>This setup for size and closing is just done to show a simple way of creating a window. Once you get into a full application you will want more control over these things so you can make your application more user friendly. Let’s get started with that right now.</p>
@@ -181,9 +181,9 @@ public class JNotepad {
                     </code></pre>
                         <p>Now we just need to add the calls to get this working. Inside the <span class="inline-code">JNotepad</span> constructor load our preferences.</p>
                     <pre><code class="java">private void exit() {
-                        ApplicationPreferences.savePrefs(parentFrame);
-                        System.exit(0);
-                    }
+    ApplicationPreferences.savePrefs(parentFrame);
+    System.exit(0);
+}
                     </code></pre>
                         <p>Then inside the exit method we save our preferences. This is the reason for a single exit point. We want to save the users current settings. Later on we will also need to perform some cleanup operations like checking if the user forgot to save after making changes.</p>
                     </div>
