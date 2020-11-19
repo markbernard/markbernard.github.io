@@ -23,26 +23,27 @@
                     </div>
                     <div class="panel-body scroll">
                         <p>All GUI applications should start by showing something to the user. In Swing, the class <span class="inline-code">javax.swing.JFrame</span>, lets you do that. Let’s start with that.</p>
-                    <pre><code class="java">import javax.swing.JFrame;
-                    import javax.swing.UIManager;
-                    
-                    public class JNotepad {
-                        public static void main(String[] args) {
-                            try {
-                                // Make the application look native.
-                                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                            } catch (Exception e) {
-                                // System look and feel is always present.
-                            }
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    JFrame frame = new JFrame("JNotepad");
-                                    frame.setVisible(true);
-                                }
-                            });
-                        }
-                    }
+                    <pre><code class="java">
+import javax.swing.JFrame;
+import javax.swing.UIManager;
+
+public class JNotepad {
+    public static void main(String[] args) {
+        try {
+            // Make the application look native.
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            // System look and feel is always present.
+        }
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                JFrame frame = new JFrame("JNotepad");
+                frame.setVisible(true);
+            }
+        });
+    }
+}
                     </code></pre>
                         <p>The first thing you see here is <span class="inline-code">UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())</span>. Swing uses a system of drawing called Pluggable Look and Feel (PLAF). PLAF is a very advanced topic so it won't be covered here. If you want more information there is a lot on the Internet. This just tells Swing to use a PLAF that matches the OS you are running on so your application can look like Windows if it is running on Windows or Mac for Mac or Linux for Linux. When using the system look and feel you can effectively ignore the exception that could be thrown, since the system look and feel is always present. You will also notice <span class="inline-code">SwingUtilities.invokeLater(Runnable doRun)</span>. Swing GUI elements are not thread safe. There is a special thread, that I’ll discuss later, called the Event Dispatch Thread (EDT). Any manipulations done by the Swing system occur there. Any changes that you are going to make to the GUI should only occur on the EDT to ensure that they do not interfere with regular Swing events/changes. Placing your GUI code inside a <span class="inline-code">java.lang.Runnable</span> object and passing that into <span class="inline-code">SwingUtilities.invokeLater(Runnable doRun)</span> will ensure that the code in the <span class="inline-code">Runnable</span> object will execute on the EDT. This is also where we will create the JFrame. This is where I will always create it.</p>
                         <div class="row">
