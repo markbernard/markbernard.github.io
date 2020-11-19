@@ -720,9 +720,7 @@ cancelButton.addActionListener(new ActionListener() {
                     </code></pre>
                         <p>This method is called from JNotepad when the user clicks the Edit -> Go To menu item. We want control of this since it is a modal dialog. So we call pack() and centerDialog() to get it looking just right. Then we call setVisible(true). This method will block on modal dialogs until the dialog is hidden. It will just wait here until one of our buttons is clicked. Once that happens the dialog is hidden and execution can continue. Next we dispose of our dialog properly and return the boolean value for whichever button was clicked by the user.</p>
                     <pre><code class="java">public int getLineNumber() {
-    return Integer.valueOf(lineNumberText.getText().isEmpty() ? 
-            "1" : 
-                lineNumberText.getText());
+    return Integer.valueOf(lineNumberText.getText().isEmpty() ? "1" : lineNumberText.getText());
 }
                     </code></pre>
                         <p>Lastly we set up a method for us to get the line number that was entered. Since we have a filter on the text field we know that only integer values or an empty string can be present in the field.</p>
