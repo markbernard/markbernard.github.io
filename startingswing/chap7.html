@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Starting Swing - Online</title>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/startingswing/css/startingswing.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.11.0/styles/default.min.css" />
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Starting Swing</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div id="content" class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h2 class="panel-title chapter-heading">Toolbar &amp; Status Bar</h2>
+                    </div>
+                    <div class="panel-body scroll">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <figure>
+                                    <img class="img-responsive" src="/startingswing/res/figure7-1.png" width="100%" alt="Figure 7-1: " title="Figure 7-1: " />
+                                    <figcaption><strong>Figure 7-1:</strong> </figcaption>
+                                </figure>
+                            </div>
+                        </div>
+                        <p>Next we can enhance our application by adding a toolbar (figure 7-1). A toolbar provides quick access to the most common features. The toolbar that we are going to build will contain the following commands: New, Open, Save, Exit, Cut, Copy, Paste, Find, Replace, Word Wrap and Help.</p>
+                    <pre><code class="java">createToolbar();
+                    </code></pre>
+                        <p>First in the constructor we will call the new method that we are going to make for creating a toolbar and adding it to the application.</p>
+                    <pre><code class="java">private void createToolbar() {
+    JToolBar bar = new JToolBar();
+    parentFrame.add(bar, BorderLayout.NORTH);
+    
+    bar.add(new FileAction.NewAction(this));
+    bar.add(new FileAction.OpenAction(this));
+    bar.add(new FileAction.SaveAction(this));
+
+    bar.addSeparator();
+    bar.add(new FileAction.ExitAction(this));
+    
+    bar.addSeparator();
+    bar.add(new EditAction.CutAction(this));
+    bar.add(new EditAction.CopyAction(this));
+    bar.add(new EditAction.PasteAction(this));
+
+    bar.addSeparator();
+    bar.add(new EditAction.FindAction(this));
+    bar.add(new EditAction.ReplaceAction(this));
+
+    bar.addSeparator();
+    bar.add(new FormatAction.WordWrapAction(this));
+    bar.addSeparator();
+    bar.add(new HelpAction.ViewHelpAction(this));
+}
+                    </code></pre>
+                        <p>As you can see this is very similar to creating menus. You first create the javax.swing.JToolBar and it to your container. After that you just add each Action that represents the options you want the user to have access to. You can also use the addSeparator() method to provide some visual separation so you can categorize your options.</p>
+                        <p>The JToolBar class has built in functionality to allow the user to drag it out of its default location and have it float over the application. The user can also drag it back to the application and dock it in one of the four sides of the application. If you wish to prevent the user from doing this you can just call the setFloatable(boolean b) method passing in false to turn off the floating toolbar. If you want to have the full functionality of this feature you need to make sure the container that holds the toolbar has its layout manager set to BorderLayout and all four borders are empty. You also need to place the toolbar in one of those borders.</p>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <figure>
+                                    <img class="img-responsive" src="/startingswing/res/figure7-2.png" width="100%" alt="Figure 7-2: " title="Figure 7-2: " />
+                                    <figcaption><strong>Figure 7-2:</strong> </figcaption>
+                                </figure>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <figure>
+                                    <img class="img-responsive" src="/startingswing/res/figure7-3.png" width="100%" alt="Figure 7-3: " title="Figure 7-3: " />
+                                    <figcaption><strong>Figure 7-3:</strong> </figcaption>
+                                </figure>
+                            </div>
+                        </div>
+                        <p>You can drag the toolbar by moving the cursor to the vertical dotted line on the left side and grabbing it and dragging it away from its current location. A blank rectangle will appear that you can move around and drop anywhere. If you drop it when the border is red that will dock it in the location that you are close to (figure 7-1). If the border is not red then it will become a floating toolbar (figure 7-2).</p>
+                    <pre><code class="java">public NewAction(JNotepad jNotepad) {
+    this.jNotepad = jNotepad;
+    putValue(Action.MNEMONIC_KEY, KeyEvent.VK_N);
+    putValue(Action.ACCELERATOR_KEY, 
+            KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
+    putValue(Action.NAME, "New");
+    putValue(Action.SHORT_DESCRIPTION, "Create a new blank document.");
+    putValue(Action.SMALL_ICON, 
+            new IconGenerator("/res/icons/NewFileSmall.png").loadImage());
+    putValue(Action.LARGE_ICON_KEY, 
+            new IconGenerator("/res/icons/NewFile.png").loadImage());
+}
+                    </code></pre>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <figure>
+                                    <img class="img-responsive" src="/startingswing/res/figure7-4.png" width="100%" alt="Figure 7-4: " title="Figure 7-4: " />
+                                    <figcaption><strong>Figure 7-4:</strong> </figcaption>
+                                </figure>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <figure>
+                                    <img class="img-responsive" src="/startingswing/res/figure7-5.png" width="100%" alt="Figure 7-5: " title="Figure 7-5: " />
+                                    <figcaption><strong>Figure 7-5:</strong> </figcaption>
+                                </figure>
+                            </div>
+                        </div>
+                        <p>All the actions that are going to end up on the toolbar should have icons added to them. Only one of these icons is necessary for the toolbar to work. The toolbar will preferentially use the LARGE_ICON_KEY if it is present. If it is not it will fall back to the SMALL_ICON (figure 7-3). If you do provide a SMALL_ICON then they will appear in the menu next to the option for each action (figure 7-4). This will allow the user to relate the toolbar icons to the menu option that each one represents. </p>
+                        <p>The SHORT_DESCRIPTION comes into play here as it did earlier. It will show as the tooltip if the user hovers over an icon on the toolbar.</p>
+                    <pre><code class="java">public class IconGenerator {
+    private static final Map&lt;String, Icon&gt; iconCache = new HashMap&lt;String, Icon&gt;();
+    private String path;
+
+    public IconGenerator(String path) {
+        this.path = path;
+    }
+    
+    public Icon loadImage() {
+        Icon icon = iconCache.get(path);
+        
+        if (icon == null) {
+            try {
+                icon = new ImageIcon(ImageIO.read(getClass().getResourceAsStream(path)));
+                iconCache.put(path, icon);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        return icon;
+    }
+}
+                    </code></pre>
+                        <p>The IconGenerator class is used to load the icons that our application will use. There is not a lot of complexity here but since icons are being loaded in a lot of places it is better to isolate the loading to one location to better maintain any future changes or bug tracking. Also we are using getClass().getResourceAsStream(String name). This means that we are providing the icons within the distribution JAR file, if the application gets used elsewhere. Since we are providing the icons then no exception should occur, unless a serious system problem occurs, so hiding the exception does not matter.</p>
+                    <pre><code class="java">private void createStatusBar() {
+    statusBarPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    JPanel positionPanel = new JPanel(new BorderLayout());
+    statusBarPanel.add(positionPanel);
+    setStausBorder(positionPanel);
+    positionLabel = new JLabel();
+    positionPanel.add(positionLabel, BorderLayout.WEST);
+    positionLabel.setFont(new Font("Consolas", Font.PLAIN, 14));
+    
+    JPanel capsLockPanel = new JPanel(new BorderLayout());
+    statusBarPanel.add(capsLockPanel);
+    setStausBorder(capsLockPanel);
+    capsLockLabel = new JLabel("CAPS OFF");
+    capsLockPanel.add(capsLockLabel, BorderLayout.WEST);
+    capsLockLabel.setFont(new Font("Consolas", Font.PLAIN, 14));
+    
+    JPanel insertPanel = new JPanel(new BorderLayout());
+    statusBarPanel.add(insertPanel);
+    setStausBorder(insertPanel);
+    insertLabel = new JLabel("INS");
+    insertPanel.add(insertLabel, BorderLayout.WEST);
+    insertLabel.setFont(new Font("Consolas", Font.PLAIN, 14));
+    
+    JPanel readOnlyPanel = new JPanel(new BorderLayout());
+    statusBarPanel.add(readOnlyPanel);
+    setStausBorder(readOnlyPanel);
+    readOnlyLabel = new JLabel("Read/Write");
+    readOnlyPanel.add(readOnlyLabel, BorderLayout.WEST);
+    readOnlyLabel.setFont(new Font("Consolas", Font.PLAIN, 14));
+    
+    if (ApplicationPreferences.isStatusBar()) {
+        add(statusBarPanel, BorderLayout.SOUTH);
+    }
+    updateStatusBar(textArea.getCaretPosition());
+}
+                    </code></pre>
+                        <p>There are now four items to display in the status bar. The original column and line location along with indicators for caps lock, insert or overwrite and whether the document can be saved to the current file. I changed the font to a monospaced font so the status indicators won’t move around when the text for them changes.</p>
+                    <pre><code class="java">private void setStausBorder(JPanel panel) {
+    panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createEtchedBorder(EtchedBorder.RAISED), 
+            BorderFactory.createEmptyBorder(1, 3, 1, 3)));
+}
+                    </code></pre>
+                        <p>The setStatusBorder(JPanel panel) method is called for each item in the status bar. It will give them a well defined space and make them look consistent.</p>
+                    <pre><code class="java">private void updateStatusBar(int position) {
+    SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+            updateCursorLocation(position);
+            updateCapsLock();
+            updateInsertMode();
+            updateReadOnly();
+        }
+    });
+}
+
+private void updateCursorLocation(int position) {
+    try {
+        int line = textArea.getLineOfOffset(position);
+        int column = position - textArea.getLineStartOffset(line);
+        positionLabel.setText(String.format("Ln %d, Col %d", 
+                (line + 1), (column + 1)));
+    } catch (Exception e) {
+        //not critical if the position in the
+        //status bar does not get updated.
+        e.printStackTrace();
+    }
+}
+
+private void updateCapsLock() {
+    if (Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_CAPS_LOCK)) {
+        capsLockLabel.setForeground(Color.BLACK);
+        capsLockLabel.setText("CAPS ON ");
+    } else {
+        capsLockLabel.setForeground(Color.LIGHT_GRAY);
+        capsLockLabel.setText("CAPS OFF");
+    }
+}
+
+private void updateInsertMode() {
+    if (insertMode) {
+        insertLabel.setForeground(Color.LIGHT_GRAY);
+        insertLabel.setText("INS");
+    } else {
+        insertLabel.setForeground(Color.BLACK);
+        insertLabel.setText("OVR");
+    }
+}
+
+private void updateReadOnly() {
+    if (readOnly) {
+        readOnlyLabel.setForeground(Color.BLACK);
+        readOnlyLabel.setText("Read Only ");
+    } else {
+        readOnlyLabel.setForeground(Color.LIGHT_GRAY);
+        readOnlyLabel.setText("Read/Write");
+    }
+}
+                    </code></pre>
+                        <p>When we are finished setting up the status bar we call updateStatusBar(int position) to setup all the initial values. This will call the individual methods for each item in the bar. The three new ones change the color of the font to better indicate what is going on. Most people don’t edit documents with the caps lock key on all the time. So when caps is off the color is light gray to become subdued and less noticeable. When it is on it be comes black so it stands out more to warn the user. The same with insert and overwrite. The normal editing operation on a file is insert mode so it is less noticeable than overwrite mode. Similarly read only will be black to warn the user in case they are expecting to save changes to the same file they just loaded. Read/Write will fade into the background.</p>
+                    <pre><code class="java">@Override
+public void keyPressed(KeyEvent e) {
+    if (e.getKeyCode() == KeyEvent.VK_CAPS_LOCK) {
+        updateCapsLock();
+    } else if (e.getKeyCode() == KeyEvent.VK_INSERT) {
+        insertMode = !insertMode;
+        updateInsertMode();
+    }
+}
+                    </code></pre>
+                        <p>I added a KeyListener to JNotepad and implemented the keyPressed(KeyEvent e) method. This is to listen for key presses of the caps lock and insert keys. If either press is detected then the appropriate method is called. You’ll notice hear that we are not wrapping these calls in a SwingUtilities.invokeLater(Runnable doRun) call. This extra step is not necessary here since all events are already processed on the EDT.</p>
+                    <pre><code class="java">public void newDocument() {
+     .
+     .
+     .
+    if (saveCompleted) {
+         .
+         .
+         .
+        readOnly = false;
+        updateReadOnly();
+        setTitle();
+    }
+    updateCursorLocation(textArea.getCaretPosition());
+}
+                    </code></pre>
+                        <p>When creating a new document no file is selected yet so we want to make sure that readOnly is set to false.</p>
+                    <pre><code class="java">public void loadFile(File path) {
+         .
+         .
+         .
+        dirty = false;
+        readOnly = !path.canWrite();
+        if (!readOnly) {
+            RandomAccessFile rout = null;
+            FileLock lock = null;
+            try {
+                rout = new RandomAccessFile(path, "rw");
+                FileChannel channel = rout.getChannel();
+                lock = channel.tryLock();
+            } catch (Exception e) {
+                readOnly = true;
+            } finally {
+                if (lock != null) {
+                    lock.release();
+                }
+                ResourceCleanup.close(rout);
+            }
+        }
+        updateReadOnly();
+        setTitle();
+         .
+         .
+         .
+}
+                    </code></pre>
+                        <p>The loadFile(File path) method needs to be updated to deal with the readOnly flag. First we call canWrite() on the file object. This will give different results on different OSes. On Windows this will check if the read only attribute is set or not. Since this attribute is separate from the security of the file it will not check if the user is allowed to write to the file. If that method call returns false we still need to check if the user is allowed to write to the file. We do this by trying to aquire a lock. If we can’t lock the file then writing will not be allowed to happen.</p>
+                    </div>
+                    <div class="panel-footer foot-nav">
+                        <div class="row">
+                            <div class="col-md-4 col-sm-1"><a href="/startingswing/chap6.html">View &amp; Help Menu</a></div>
+                            <div class="col-md-4 col-sm-1 text-center"><a href="/startingswing/index.html">Contents</a></div>
+                            <div class="col-md-4 col-sm-1"><span class="pull-right"><a href="/startingswing/chap8.html">Multiple Tabs &amp; Recent Documents</a></span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.11.0/highlight.min.js"></script>
+    <script src="/startingswing/js/startingswing.js" type="text/javascript"></script>
+</body>
+</html>
