@@ -1,3 +1,3 @@
 # markbernard.github.io
 
-[Starting Swing(https://markbernard.github.io/startingswing/)]
+[Starting Swing](https://markbernard.github.io/startingswing/)
